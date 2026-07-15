@@ -1192,7 +1192,7 @@ ssl-cert                                                                      1.
 stdlib                                                                        go1.25.12                              go-module  (+3 duplicates)  
 stdlib                                                                        go1.26.4                               go-module  (+4 duplicates)  
 steam                                                                         1.6.1                                  python                      
-steam-launcher                                                                1:1.0.0.87                             deb                         
+steam-launcher                                                                1:1.0.0.85                             deb                         
 steam-libs                                                                    1:1.0.0.83~ds-3                        deb        (+1 duplicate)   
 steam-libs-i386                                                               1:1.0.0.83~ds-3                        deb                         
 stterm                                                                        0.9.2-1                                deb                         
