@@ -23,11 +23,9 @@ param_usage_include_ports: true
 param_ports:
   - {external_port: "3000", internal_port: "3000", port_desc: "Steam desktop gui HTTP must be proxied."}
   - {external_port: "3001", internal_port: "3001", port_desc: "Steam desktop gui HTTPS."}
-security_opt_param: true
-security_opt_param_vars:
-  - {run_var: "seccomp=unconfined", compose_var: "seccomp:unconfined", desc: "This is needed to allow bwrap to use namespacing for games."}
 opt_security_opt_param: true
 opt_security_opt_param_vars:
+  - {run_var: "seccomp=unconfined", compose_var: "seccomp:unconfined", desc: "This is needed to allow bwrap to use namespacing for games."}
   - {run_var: "apparmor=unconfined", compose_var: "apparmor:unconfined", desc: "For Debian/Ubuntu hosts Steam needs elevated perms that AppArmor blocks."}
 custom_params:
   - {name: "shm-size", name_compose: "shm_size", value: "1gb", desc: "Recommended for all desktop images."}
@@ -36,7 +34,45 @@ selkies_blurb: true
 show_nvidia: true
 # application setup block
 app_setup_block_enabled: true
-app_setup_block: "The application can be accessed at:\n\n* https://yourhost:3001/\n\n>[!NOTE]\n>This image is for a web accessible version of Steam to be played through a web browser it is in development and has oddities, if you want a fully flushed out Moonlight couch solution please consider [Wolf](https://games-on-whales.github.io/wolf/stable/user/quickstart.html) or another non Docker solution. Moonlight clients have major advantages over using a web browser.\n\n## GPU Support\n\nUsing an Intel/AMD GPU is usually as easy as just passing `--device /dev/dri:/dev/dri`.\nIf you have multiple GPUs you need to pass both the setting for the render node and the encoder IE for the second GPU:\n\n```\n-e DRINODE=/dev/dri/renderD129 \\\n-e DRI_NODE=/dev/dri/renderD129\n```\n\nNvidia support only works on 580 and up full proprietary drivers (no MIT/GPL) with `nvidia-drm.modeset=1` kernel parameter set. You must ensure the card is initialized before running a container so on headless systems run `nvidia-modprobe --modeset` from the host even with this kernel parameter set, this only needs to be run once per boot.\n\nThese modifications for NVIDIA are for Wayland to function properly and have nothing to do with the Docker runtime. If you are using compose it is important to run `sudo nvidia-ctk runtime configure --runtime=docker` this is a persistent setting and only needs to run once.\n\n## Gamepad support\n\nThis container leverages a userspace gamepad interposer to provide gamepad support. To use a gamepad always force Proton in \"Properties>Compatibility\" even for Linux native games, \"Proton Hotfix\" is a good default selection. You cannot use the \"Steam Input\" feature on any game as the uinput socket and HID do not exist.\n\n## Gaming mode\n\nAn absolute must for mouse and keyboard input is sending relative mouse input from the browser, you will need to use the \"Gaming Mode\" which is a small crosshair in the top right of the sidebar. This runs in fullscreen and traps you in the window, to exit this mode hold down escape for 3 seconds.\n\n## Game Launching\n\nIncluded in this image are tools for managing [Proton versions](https://davidotek.github.io/protonup-qt/) and a [command line launcher](https://github.com/Open-Wine-Components/umu-launcher). This means once a game or application is installed via Steam it can be directly launched on init by creating a config file and modifying `/config/.config/labwc/autostart` to run `umu-run` instead of Steam.: \n\n```\numu-run --config /config/game.toml\n```\n\n```toml\n[umu]\nprefix = \"/config/game\"\nexe = \"/config/Desktop/game/game.exe\"\nproton = \"/config/.local/share/Steam/compatibilitytools.d/GE-Proton-version\"\ngame_id = \"0\"\n```\n\nThis facilitates custom home directories with pre-configured runtimes and gamefiles for baking images outside of using the Steam launcher. \n"
+app_setup_block: |
+  The application can be accessed at:
+
+  * https://yourhost:3001/
+
+  >[!NOTE]
+  >This image is for a web accessible version of Steam to be played through a web browser, if you want a fully flushed out Moonlight couch solution please consider [Wolf](https://games-on-whales.github.io/wolf/stable/user/quickstart.html) or another non Docker solution. Moonlight clients have major advantages over using a web browser specifically for gaming.
+
+  ## Permissions
+
+  Steam runs its browser helper and every game inside [bubblewrap](https://github.com/containers/bubblewrap), which needs user namespaces. Docker's default seccomp profile (and AppArmor on Debian/Ubuntu hosts) blocks those, so the recommended way to run this container is with `--security-opt seccomp=unconfined` and `--security-opt apparmor=unconfined`, which lets Steam use bubblewrap as intended.
+
+  These options are not required, but running without them will degrade performance as userspace proot with ptrace or fakechroot will be used to run games. [proot-bwrap](https://github.com/selkies-project/proot-bwrap)
+
+  ## Gamepad support
+
+  This container leverages a userspace gamepad interposer to provide gamepad support. To use a gamepad always force Proton in "Properties>Compatibility" even for Linux native games, "Proton Hotfix" is a good default selection. You cannot use the "Steam Input" feature on any game as the uinput socket and HID do not exist.
+
+  ## Gaming mode
+
+  An absolute must for mouse and keyboard input is sending relative mouse input from the browser, you will need to use the "Gaming Mode" which is a small crosshair in the top right of the sidebar. This runs in fullscreen and traps you in the window, to exit this mode hold down escape for 3 seconds.
+
+  ## Game Launching
+
+  Included in this image are tools for managing [Proton versions](https://davidotek.github.io/protonup-qt/) and a [command line launcher](https://github.com/Open-Wine-Components/umu-launcher). This means once a game or application is installed via Steam it can be directly launched on init by creating a config file and modifying `/config/.config/labwc/autostart` to run `umu-run` instead of Steam.:
+
+  ```
+  umu-run --config /config/game.toml
+  ```
+
+  ```toml
+  [umu]
+  prefix = "/config/game"
+  exe = "/config/Desktop/game/game.exe"
+  proton = "/config/.local/share/Steam/compatibilitytools.d/GE-Proton-version"
+  game_id = "0"
+  ```
+
+  This facilitates custom home directories with pre-configured runtimes and gamefiles for baking images outside of using the Steam launcher.
 # init diagram
 init_diagram: |
   "steam:latest": {
@@ -110,6 +146,7 @@ init_diagram: |
   "steam:latest" <- Base Images
 # changelog
 changelogs:
+  - {date: "12.09.26:", desc: "Make seccomp and apparmor unconfined optional with proot-bwrap."}
   - {date: "04.02.26:", desc: "Add ProtonUp Qt for runtime management and umu-run for custom auto game launching."}
   - {date: "17.01.26:", desc: "Document Nvidia support."}
   - {date: "09.01.26:", desc: "Initial Version."}

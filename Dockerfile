@@ -20,9 +20,12 @@ RUN \
   dpkg --add-architecture i386 && \
   apt-get update && \
   apt-get install -y --no-install-recommends \
+    bubblewrap \
     gcc-multilib \
     libc6:i386 \
     libegl1:i386 \
+    libfakechroot:amd64 \
+    libfakechroot:i386 \
     libgbm1:i386 \
     libgl1:i386 \
     libgl1-mesa-dri:i386 \

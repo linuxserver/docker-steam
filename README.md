@@ -61,21 +61,13 @@ The application can be accessed at:
 * https://yourhost:3001/
 
 >[!NOTE]
->This image is for a web accessible version of Steam to be played through a web browser it is in development and has oddities, if you want a fully flushed out Moonlight couch solution please consider [Wolf](https://games-on-whales.github.io/wolf/stable/user/quickstart.html) or another non Docker solution. Moonlight clients have major advantages over using a web browser.
+>This image is for a web accessible version of Steam to be played through a web browser, if you want a fully flushed out Moonlight couch solution please consider [Wolf](https://games-on-whales.github.io/wolf/stable/user/quickstart.html) or another non Docker solution. Moonlight clients have major advantages over using a web browser specifically for gaming.
 
-## GPU Support
+## Permissions
 
-Using an Intel/AMD GPU is usually as easy as just passing `--device /dev/dri:/dev/dri`.
-If you have multiple GPUs you need to pass both the setting for the render node and the encoder IE for the second GPU:
+Steam runs its browser helper and every game inside [bubblewrap](https://github.com/containers/bubblewrap), which needs user namespaces. Docker's default seccomp profile (and AppArmor on Debian/Ubuntu hosts) blocks those, so the recommended way to run this container is with `--security-opt seccomp=unconfined` and `--security-opt apparmor=unconfined`, which lets Steam use bubblewrap as intended.
 
-```
--e DRINODE=/dev/dri/renderD129 \
--e DRI_NODE=/dev/dri/renderD129
-```
-
-Nvidia support only works on 580 and up full proprietary drivers (no MIT/GPL) with `nvidia-drm.modeset=1` kernel parameter set. You must ensure the card is initialized before running a container so on headless systems run `nvidia-modprobe --modeset` from the host even with this kernel parameter set, this only needs to be run once per boot.
-
-These modifications for NVIDIA are for Wayland to function properly and have nothing to do with the Docker runtime. If you are using compose it is important to run `sudo nvidia-ctk runtime configure --runtime=docker` this is a persistent setting and only needs to run once.
+These options are not required, but running without them will degrade performance as userspace proot with ptrace or fakechroot will be used to run games. [proot-bwrap](https://github.com/selkies-project/proot-bwrap)
 
 ## Gamepad support
 
@@ -87,7 +79,7 @@ An absolute must for mouse and keyboard input is sending relative mouse input fr
 
 ## Game Launching
 
-Included in this image are tools for managing [Proton versions](https://davidotek.github.io/protonup-qt/) and a [command line launcher](https://github.com/Open-Wine-Components/umu-launcher). This means once a game or application is installed via Steam it can be directly launched on init by creating a config file and modifying `/config/.config/labwc/autostart` to run `umu-run` instead of Steam.: 
+Included in this image are tools for managing [Proton versions](https://davidotek.github.io/protonup-qt/) and a [command line launcher](https://github.com/Open-Wine-Components/umu-launcher). This means once a game or application is installed via Steam it can be directly launched on init by creating a config file and modifying `/config/.config/labwc/autostart` to run `umu-run` instead of Steam.:
 
 ```
 umu-run --config /config/game.toml
@@ -196,7 +188,7 @@ services:
     image: lscr.io/linuxserver/steam:latest
     container_name: steam
     security_opt:
-      - seccomp:unconfined
+      - seccomp:unconfined #optional
       - apparmor:unconfined #optional
     environment:
       - PUID=1000
@@ -216,7 +208,7 @@ services:
 ```bash
 docker run -d \
   --name=steam \
-  --security-opt seccomp=unconfined \
+  --security-opt seccomp=unconfined `#optional` \
   --security-opt apparmor=unconfined `#optional` \
   -e PUID=1000 \
   -e PGID=1000 \
@@ -407,6 +399,7 @@ Once registered you can define the dockerfile to use with `-f Dockerfile.aarch64
 
 ## Versions
 
+* **12.09.26:** - Make seccomp and apparmor unconfined optional with proot-bwrap.
 * **04.02.26:** - Add ProtonUp Qt for runtime management and umu-run for custom auto game launching.
 * **17.01.26:** - Document Nvidia support.
 * **09.01.26:** - Initial Version.
