@@ -1,4 +1,38 @@
 #! /bin/bash
 
-export LD_PRELOAD="/usr/lib/selkies_joystick_interposer.so:/usr/lib/libudev.so.1.0.0-fake:/usr/lib/selkies_joystick_interposer_32.so:/usr/lib/libudev.so.1.0.0-fake_32" 
-foot -e /usr/bin/steam --ozone-platform=wayland "$@"
+# 64 and 32 bit input interposers and fake udev for gamepads
+STEAM_PRELOAD="/usr/lib/selkies_input_interposer.so:/usr/lib/libudev.so.1.0.0-fake:/usr/lib/selkies_input_interposer_32.so:/usr/lib/libudev.so.1.0.0-fake_32"
+PROOT_BWRAP="${HOME}/.local/bin/proot-bwrap"
+STEAM_ARGS=()
+TERMINAL=xterm
+
+# Wayland check
+if [ "${PIXELFLUX_WAYLAND,,}" == "true" ]; then
+  STEAM_ARGS+=(--ozone-platform=wayland)
+  TERMINAL=foot
+fi
+
+bwrap_works() {
+  env -u LD_PRELOAD bwrap \
+    --ro-bind / / \
+    --dev /dev \
+    --proc /proc \
+    --unshare-pid \
+    /bin/true >/dev/null 2>&1
+}
+
+if bwrap_works; then
+  echo "wrapped-steam: user namespaces are available, using bubblewrap"
+  unset BWRAP
+else
+  echo "wrapped-steam: user namespaces are not available, falling back to proot-bwrap"
+  echo "wrapped-steam: pass --security-opt seccomp=unconfined (and apparmor=unconfined on Debian/Ubuntu hosts) to use bubblewrap"
+  export BWRAP="${BWRAP:-${PROOT_BWRAP}}"
+  if [ ! -x "${BWRAP}" ]; then
+    echo "wrapped-steam: ${BWRAP} is missing or not executable, Steam will not be able to launch games" >&2
+  fi
+  STEAM_ARGS+=(-no-cef-sandbox)
+fi
+
+export LD_PRELOAD="${STEAM_PRELOAD}"
+${TERMINAL} -e /usr/bin/steam "${STEAM_ARGS[@]}" "$@"

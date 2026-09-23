@@ -20,9 +20,11 @@ RUN \
   dpkg --add-architecture i386 && \
   apt-get update && \
   apt-get install -y --no-install-recommends \
-    gcc-multilib \
+    bubblewrap \
     libc6:i386 \
     libegl1:i386 \
+    libfakechroot:amd64 \
+    libfakechroot:i386 \
     libgbm1:i386 \
     libgl1:i386 \
     libgl1-mesa-dri:i386 \
@@ -57,22 +59,7 @@ RUN \
   chmod +x prqt.app && \
   ./prqt.app --appimage-extract && \
   mv squashfs-root /opt/protonup-qt && \
-  echo "**** install 32 bit interposers ****" && \
-  cd /tmp && \
-  git clone \
-    https://github.com/selkies-project/selkies.git && \
-  cd selkies/addons/js-interposer && \
-  gcc -m32 -shared -fPIC -ldl \
-    -o selkies_joystick_interposer_32.so \
-    joystick_interposer.c && \
-  mv \
-    selkies_joystick_interposer_32.so \
-    /usr/lib/selkies_joystick_interposer_32.so && \
-  cd ../fake-udev && \
-  make CC="gcc -m32" && \
-  mv \
-    libudev.so.1.0.0-fake \
-    /opt/lib/libudev.so.1.0.0-fake_32 && \
+  echo "**** copy fake udev libs ****" && \
   cp \
     /opt/lib/* \
     /usr/lib/ && \
