@@ -43,7 +43,7 @@ cli                                                                           UN
 cli-32                                                                        UNKNOWN                                binary                      
 cli-64                                                                        UNKNOWN                                binary                      
 cli-arm64                                                                     UNKNOWN                                binary                      
-click                                                                         8.5.0                                  python                      
+click                                                                         8.5.1                                  python                      
 cloud.google.com/go/auth                                                      v0.20.0                                go-module                   
 cloud.google.com/go/auth/oauth2adapt                                          v0.2.8                                 go-module                   
 cloud.google.com/go/compute/metadata                                          v0.10.0                                go-module                   
@@ -98,7 +98,7 @@ dunst                                                                         1.
 exim4-base                                                                    4.98.2-1+deb13u5                       deb                         
 exim4-config                                                                  4.98.2-1+deb13u5                       deb                         
 exim4-daemon-light                                                            4.98.2-1+deb13u5                       deb                         
-fastapi                                                                       0.162.0                                python                      
+fastapi                                                                       0.162.2                                python                      
 file                                                                          1:5.46-5                               deb                         
 findutils                                                                     4.10.0-3                               deb                         
 firmware-amd-graphics                                                         20250410-2                             deb                         
@@ -1117,8 +1117,8 @@ pulsectl                                                                      24
 pulsectl-asyncio                                                              1.3.2                                  python                      
 pycparser                                                                     3.12                                   python                      
 pycryptodomex                                                                 3.23.0                                 python                      
-pydantic                                                                      2.14.2                                 python                      
-pydantic-core                                                                 2.50.2                                 python                      
+pydantic                                                                      2.14.3                                 python                      
+pydantic-core                                                                 2.50.4                                 python                      
 pyee                                                                          16.0.1                                 python                      
 pygobject                                                                     3.50.0                                 python                      
 pylibsrtp                                                                     1.0.0                                  python                      
@@ -1188,7 +1188,7 @@ tomli                                                                         2.
 truststore                                                                    0.10.1                                 python                      
 typing-extensions                                                             4.16.0                                 python                      
 typing-inspection                                                             0.4.5                                  python                      
-tzdata                                                                        2026e-0+deb13u1                        deb                         
+tzdata                                                                        2026f-0+deb13u1                        deb                         
 udev                                                                          257.13-1~deb13u1                       deb                         
 umu-launcher                                                                  1.4.4                                  python                      
 urllib3                                                                       2.3.0                                  python                      
@@ -1198,7 +1198,7 @@ uvicorn                                                                       0.
 uvloop                                                                        0.23.0                                 python                      
 vdf                                                                           4.0                                    python                      
 vulkan-tools                                                                  1.4.304.0+dfsg1-1                      deb                         
-watchdog                                                                      7.0.0                                  python                      
+watchdog                                                                      7.1.0                                  python                      
 watchfiles                                                                    1.3.0                                  python                      
 websockets                                                                    17.4                                   python                      
 wheel                                                                         0.46.3                                 python                      
@@ -1245,6 +1245,6 @@ yarl                                                                          1.
 zenity                                                                        4.1.90-1                               deb                         
 zenity-common                                                                 4.1.90-1                               deb                         
 zipp                                                                          3.23.0                                 python                      
-zlib1g                                                                        1:1.3.dfsg+really1.3.1-1+b1            deb        (+1 duplicate)   
+zlib1g                                                                        1:1.3.dfsg+really1.3.1-1+deb13u1       deb        (+1 duplicate)   
 zstandard                                                                     0.25.0                                 python                      
 zstd                                                                          1.5.7+dfsg-1                           deb                         
